@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLOBAL GEOPOLITICAL WAR ROOM | Strategic Macro Intelligence</title>
+  <meta name="description" content="AI-powered Geopolitical Macro-Financial War Room Dashboard — Live AI OSINT &amp; Mock Mode">
+
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet GIS Tactical Mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="warroom-theme">
+
+  <!-- ============================================================ -->
+  <!-- TOP COMMAND HUD                                               -->
+  <!-- ============================================================ -->
+  <header class="hud-header">
+    <div class="hud-top-strip">
+      <div class="hud-classification">
+        <span class="hud-badge pulse-dot"><span class="dot"></span> STRATEGIC INTELLIGENCE DIRECTIVE</span>
+        <span class="hud-badge mode-badge" id="modeIndicatorBadge">INITIALIZING...</span>
+        <span class="hud-system-status" id="systemStatus">STATUS: DEFCON 2 // STANDBY</span>
+      </div>
+      <div class="hud-telemetry">
+        <span class="telemetry-item" id="liveClock">--:--:-- UTC</span>
+        <span class="telemetry-separator">|</span>
+        <span class="telemetry-item" id="connectionBadge">API: CONNECTING</span>
+        <span class="telemetry-separator">|</span>
+        <button class="hud-history-btn" id="historyToggleBtn" title="Archived Intelligence Dossiers & Comparisons" type="button">
+          <span class="history-icon">📜</span> ARCHIVE (<span id="hudHistoryCount">0</span>)
+        </button>
+        <span class="telemetry-separator">|</span>
+        <button class="hud-settings-btn" id="settingsToggleBtn" title="Engine Settings" type="button">
+          <span class="settings-icon">⚙</span> SETTINGS
+        </button>
+      </div>
+    </div>
+
+    <div class="hud-main-title-container">
+      <div class="title-decor left-decor"></div>
+      <div class="title-content">
+        <h1 class="main-title">GLOBAL GEOPOLITICAL WAR ROOM</h1>
+        <p class="main-subtitle">
+          <span class="sub-step">Geopolitics</span>
+          <span class="sub-arrow">→</span>
+          <span class="sub-step">Economy</span>
+          <span class="sub-arrow">→</span>
+          <span class="sub-step">Markets</span>
+          <span class="sub-arrow">→</span>
+          <span class="sub-step">Assets</span>
+        </p>
+      </div>
+      <div class="title-decor right-decor"></div>
+    </div>
+
+    <!-- Main Action Bar -->
+    <div class="action-bar">
+      <div class="action-buttons-group">
+        <button id="runWarRoomBtn" class="warroom-btn-primary" type="button">
+          <span class="btn-glow-layer"></span>
+          <span class="btn-icon">⚡</span>
+          <span class="btn-text">RUN WAR ROOM</span>
+          <span class="btn-subtext" id="btnSubtext">[ INITIATE INTELLIGENCE SCAN ]</span>
+        </button>
+
+        <button id="quickHistoryBtn" class="warroom-btn-secondary" type="button" title="View historical runs and compare changes">
+          <span class="btn-icon">📜</span>
+          <span class="btn-text">DOSSIER ARCHIVE</span>
+        </button>
+
+        <div class="export-actions-wrap" id="exportActionsWrap" style="display: none;">
+          <button id="exportPdfBtn" class="warroom-btn-secondary" type="button" title="Export high-resolution institutional PDF report">
+            <span class="btn-icon">📄</span>
+            <span class="btn-text">EXPORT PDF</span>
+          </button>
+          <button id="exportJsonBtn" class="warroom-btn-secondary" type="button" title="Download raw structured JSON dataset">
+            <span class="btn-icon">💾</span>
+            <span class="btn-text">EXPORT JSON</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="report-meta-box" id="reportMetaBox" style="display: none;">
+        <div class="meta-item">
+          <span class="meta-label">DOSSIER ID:</span>
+          <span class="meta-value" id="reportIdDisplay">--</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">DATE:</span>
+          <span class="meta-value" id="reportDateDisplay">--</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">GENERATED:</span>
+          <span class="meta-value" id="generatedAtDisplay">--</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- SETTINGS DRAWER                                               -->
+  <!-- ============================================================ -->
+  <div class="settings-drawer" id="settingsDrawer" style="display: none;">
+    <div class="settings-drawer-inner">
+      <div class="settings-header">
+        <h3 class="settings-title">⚙ ENGINE CONFIGURATION</h3>
+        <button class="settings-close-btn" id="settingsCloseBtn" type="button" title="Close">✕</button>
+      </div>
+
+      <!-- Mode Status Panel -->
+      <div class="settings-section">
+        <div class="settings-section-label">CURRENT OPERATIONAL MODE</div>
+        <div class="mode-status-panel" id="modeStatusPanel">
+          <div class="mode-status-row">
+            <div class="mode-status-indicator" id="modeStatusDot"></div>
+            <div class="mode-status-info">
+              <div class="mode-status-name" id="modeStatusName">Detecting...</div>
+              <div class="mode-status-desc" id="modeStatusDesc">Checking backend configuration...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Key Entry -->
+      <div class="settings-section">
+        <div class="settings-section-label">OPENAI API KEY <span class="settings-label-note">(for Live AI Mode)</span></div>
+        <div class="api-key-input-wrap">
+          <input
+            type="password"
+            id="apiKeyInput"
+            class="api-key-input"
+            placeholder="sk-proj-... (stored locally in .env only)"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button type="button" class="api-key-toggle-btn" id="apiKeyToggleBtn" title="Show / Hide key">👁</button>
+        </div>
+        <div class="settings-hint">
+          ⚠ API key is never sent to the browser or stored in cookies. Update <code>.env</code> on your server to change permanently.
+        </div>
+      </div>
+
+      <!-- Mode Switch -->
+      <div class="settings-section">
+        <div class="settings-section-label">MODE CONTROL</div>
+        <div class="mode-switch-group">
+          <button type="button" class="mode-switch-btn" id="switchMockBtn">
+            <span class="msw-icon">🛡️</span>
+            <span class="msw-label">MOCK MODE</span>
+            <span class="msw-desc">Offline · No credits required</span>
+          </button>
+          <button type="button" class="mode-switch-btn mode-switch-live" id="switchLiveBtn">
+            <span class="msw-icon">🔴</span>
+            <span class="msw-label">LIVE AI MODE</span>
+            <span class="msw-desc">OpenAI OSINT · Web search</span>
+          </button>
+        </div>
+        <div class="mode-switch-note" id="modeSwitchNote"></div>
+      </div>
+
+      <!-- Credits / Status Check -->
+      <div class="settings-section">
+        <div class="settings-section-label">DIAGNOSTICS</div>
+        <div class="diagnostics-grid">
+          <button type="button" class="diag-btn" id="checkHealthBtn">🩺 CHECK HEALTH</button>
+          <button type="button" class="diag-btn" id="checkModeBtn">📡 CHECK MODE</button>
+          <button type="button" class="diag-btn diag-danger" id="checkCreditsBtn">💳 TEST API CREDITS</button>
+        </div>
+        <div class="diag-output" id="diagOutput"></div>
+      </div>
+
+      <!-- Live mode info -->
+      <div class="settings-info-box">
+        <strong>How to enable Live AI Mode:</strong>
+        <ol>
+          <li>Top up billing at <a href="https://platform.openai.com/settings/organization/billing" target="_blank" rel="noopener">platform.openai.com/billing</a></li>
+          <li>Edit <code>.env</code>: set <code>WAR_ROOM_MODE=live</code></li>
+          <li>Ensure <code>OPENAI_API_KEY=sk-proj-...</code> is set</li>
+          <li>Restart the server and reload this page</li>
+        </ol>
+        <p>Each Live scan takes ~30–60 seconds. Costs ≈ $0.03–$0.10 per run with GPT-4o.</p>
+      </div>
+    </div>
+  </div>
+  <div class="settings-overlay" id="settingsOverlay" style="display: none;"></div>
+
+  <!-- ============================================================ -->
+  <!-- HISTORY & COMPARISON DRAWER                                   -->
+  <!-- ============================================================ -->
+  <div class="history-drawer" id="historyDrawer" style="display: none;">
+    <div class="history-drawer-inner">
+      <div class="history-header">
+        <div class="history-title-wrap">
+          <h3 class="history-title">📜 INTELLIGENCE ARCHIVE</h3>
+          <span class="history-subtitle">Persistent SQLite Dossier Store (<span id="historyTotalCount">0</span> Runs)</span>
+        </div>
+        <button class="history-close-btn" id="historyCloseBtn" type="button" title="Close Archive">✕</button>
+      </div>
+
+      <!-- Comparison Selector Bar -->
+      <div class="history-compare-bar">
+        <div class="compare-selection-boxes">
+          <div class="compare-slot" id="slotA">
+            <span class="slot-badge">BASELINE (A)</span>
+            <div class="slot-details" id="slotAText">Select below...</div>
+          </div>
+          <div class="compare-divider">⇄</div>
+          <div class="compare-slot" id="slotB">
+            <span class="slot-badge">TARGET (B)</span>
+            <div class="slot-details" id="slotBText">Select below...</div>
+          </div>
+        </div>
+        <div class="compare-actions-row">
+          <button class="history-btn-primary" id="launchCompareBtn" disabled type="button">
+            ⚖️ RUN DIFF COMPARISON
+          </button>
+          <button class="history-btn-secondary" id="seedHistoryBtn" title="Seed multi-day mock runs for delta testing" type="button">
+            🌱 SEED SAMPLES
+          </button>
+        </div>
+        <div class="history-note" id="historyCompareNote">
+          Click <strong>[+ BASELINE]</strong> on an older run and <strong>[+ TARGET]</strong> on a newer run to analyze shifts.
+        </div>
+      </div>
+
+      <!-- History Run Cards List -->
+      <div class="history-list-container" id="historyListContainer">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+  <div class="history-overlay" id="historyOverlay" style="display: none;"></div>
+
+  <!-- ============================================================ -->
+  <!-- SIDE-BY-SIDE RUN COMPARISON MODAL                            -->
+  <!-- ============================================================ -->
+  <div class="compare-modal" id="compareModal" style="display: none;">
+    <div class="compare-modal-content">
+      <div class="compare-modal-header">
+        <div class="compare-modal-meta">
+          <span class="header-tag">00 // INTELLIGENCE COMPARISON ENGINE</span>
+          <h2 class="compare-modal-title" id="compareModalTitle">CROSS-RUN GEOPOLITICAL &amp; ASSET DELTA</h2>
+        </div>
+        <button class="compare-modal-close" id="compareModalCloseBtn" type="button" title="Close Comparison">✕</button>
+      </div>
+      <div class="compare-modal-body" id="compareModalBody">
+        <!-- Dynamically rendered via JS -->
+      </div>
+    </div>
+  </div>
+  <div class="compare-backdrop" id="compareBackdrop" style="display: none;"></div>
+
+  <!-- Printable Executive Header (Print/PDF only) -->
+  <div class="print-executive-header" id="printExecutiveHeader" style="display: none;">
+    <div class="print-header-top">
+      <div class="print-classification">CONFIDENTIAL // STRATEGIC MACRO INTELLIGENCE DOSSIER</div>
+      <div class="print-stamp">GLOBAL GEOPOLITICAL WAR ROOM</div>
+    </div>
+    <div class="print-meta-grid">
+      <div><strong>DOSSIER ID:</strong> <span id="printReportId">--</span></div>
+      <div><strong>DATE:</strong> <span id="printReportDate">--</span></div>
+      <div><strong>TIMESTAMP:</strong> <span id="printGeneratedAt">--</span></div>
+      <div><strong>OPERATIONAL MODE:</strong> <span id="printModeTag">--</span></div>
+    </div>
+  </div>
+
+  <main class="dashboard-container">
+    <!-- Error Notification Banner -->
+    <div id="errorBanner" class="alert-banner alert-error" style="display: none;" role="alert">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <strong id="errorTitle">ANALYSIS ENGINE ERROR</strong>
+        <p id="errorMessage">Unable to connect to intelligence backend.</p>
+      </div>
+      <div class="alert-actions">
+        <button id="retryBtn" class="alert-retry-btn" type="button">RETRY SCAN</button>
+        <button id="dismissErrorBtn" class="alert-dismiss" title="Dismiss" type="button">✕</button>
+      </div>
+    </div>
+
+    <!-- Scanning & Loading Overlay -->
+    <section id="scanningSection" class="scanning-overlay" style="display: none;" aria-live="polite">
+      <div class="radar-box">
+        <div class="radar-circle ring-1"></div>
+        <div class="radar-circle ring-2"></div>
+        <div class="radar-circle ring-3"></div>
+        <div class="radar-crosshair-h"></div>
+        <div class="radar-crosshair-v"></div>
+        <div class="radar-sweep"></div>
+        <div class="radar-blip blip-1"></div>
+        <div class="radar-blip blip-2"></div>
+        <div class="radar-blip blip-3"></div>
+      </div>
+
+      <div class="scanning-text-container">
+        <h2 class="scanning-title glow-text" id="scanningTitle">WAR ROOM SCANNING...</h2>
+        <div class="scanning-log-box" id="scanningLogBox">
+          <p class="scan-log-line active">&gt; Initializing Geopolitical Intelligence scan...</p>
+          <p class="scan-log-line">&gt; Querying conflict theaters, trade corridors, and energy chokepoints...</p>
+          <p class="scan-log-line">&gt; Running cross-asset transmission model (Crude, Gold, DXY, FX, Yields)...</p>
+          <p class="scan-log-line">&gt; Formulating probabilistic scenarios and 24h-7d strategic outlooks...</p>
+        </div>
+        <div class="scan-progress-bar">
+          <div class="scan-progress-fill"></div>
+        </div>
+        <div class="scan-mode-label" id="scanModeLabel"></div>
+      </div>
+    </section>
+
+    <!-- Initial Standby State -->
+    <section id="standbyState" class="standby-card">
+      <div class="standby-reticle">
+        <div class="reticle-core"></div>
+      </div>
+      <h3>INTELLIGENCE TERMINAL INITIALIZED</h3>
+      <p id="standbyDescription">Click <strong>[ RUN WAR ROOM ]</strong> to synthesize today's active conflicts, macroeconomic linkages, market risk premiums, and cross-asset impacts.</p>
+      <div class="feature-pills" id="featurePills">
+        <span class="pill" id="pillMode">🛡️ Intelligence Mode</span>
+        <span class="pill">🎯 10-Asset Matrix</span>
+        <span class="pill">⚡ 3-Scenario Engine</span>
+        <span class="pill">🎬 90s Video Script</span>
+        <span class="pill">🗺️ Tactical GIS Map</span>
+      </div>
+    </section>
+
+    <!-- Full Intelligence Report Display -->
+    <div id="reportContainer" class="report-grid" style="display: none;">
+
+      <!-- Top Regime & Mode Notice Banner -->
+      <section class="card span-full regime-banner-card" id="cardRegimeBanner">
+        <div class="regime-banner-inner">
+          <div class="regime-indicator-wrap">
+            <span class="regime-badge-label">MARKET REGIME:</span>
+            <span class="regime-title" id="marketRegimeTitle">—</span>
+          </div>
+          <div class="disclaimer-badge-wrap">
+            <span class="mock-notice-pill" id="reportModePill">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. Executive Summary -->
+      <section class="card span-full executive-summary-card" id="cardExecutiveSummary">
+        <div class="card-header">
+          <div class="header-tag">01 // STRATEGIC SYNTHESIS</div>
+          <h2 class="card-title">EXECUTIVE SUMMARY</h2>
+        </div>
+        <div class="card-body">
+          <div id="executiveSummaryContent" class="executive-text">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Tactical Geopolitical Risk Heatmap -->
+      <section class="card span-full heatmap-card" id="cardHeatmap">
+        <div class="card-header heatmap-header">
+          <div>
+            <div class="header-tag">02 // GEOSPATIAL INTELLIGENCE &amp; CHOKEPOINT SURVEILLANCE</div>
+            <h2 class="card-title">GEOPOLITICAL RISK HEATMAP &amp; THEATER VISUALIZER</h2>
+          </div>
+          <div class="map-toolbar">
+            <div class="map-filter-group" id="mapFilters">
+              <button class="map-filter-btn active" data-filter="all" type="button">ALL THEATERS</button>
+              <button class="map-filter-btn filter-critical" data-filter="critical" type="button">🔴 CRITICAL</button>
+              <button class="map-filter-btn filter-chokepoint" data-filter="chokepoint" type="button">⚓ CHOKEPOINTS</button>
+              <button class="map-filter-btn filter-conflict" data-filter="conflict" type="button">⚔️ CONFLICTS</button>
+            </div>
+            <button class="map-action-btn" id="resetMapBtn" title="Reset Global Map View" type="button">🌐 GLOBAL VIEW</button>
+          </div>
+        </div>
+        <div class="card-body heatmap-body-layout">
+          <div class="map-wrapper">
+            <div id="tacticalMap" class="tactical-map-container"></div>
+            <div class="map-overlay-reticle">
+              <span class="reticle-label">GIS OSINT // REAL-TIME THEATER LAYER</span>
+            </div>
+          </div>
+          <div class="theater-sidebar">
+            <div class="theater-sidebar-header">
+              <span class="sidebar-title">STRATEGIC HOTSPOTS</span>
+              <span class="sidebar-count" id="hotspotCountBadge">— THEATERS</span>
+            </div>
+            <div class="theater-list-container" id="theaterListContainer">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Geopolitical Events Cards -->
+      <section class="card span-full top-events-card" id="cardGeopoliticalEvents">
+        <div class="card-header">
+          <div class="header-tag">03 // ACTIVE THEATERS &amp; FLASHPOINTS</div>
+          <h2 class="card-title">GEOPOLITICAL EVENTS &amp; MACRO TRANSMISSION</h2>
+        </div>
+        <div class="card-body">
+          <div id="geopoliticalEventsList" class="geo-events-grid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Event Lifecycle Dynamics -->
+      <section class="card span-full event-lifecycle-card" id="cardEventLifecycle">
+        <div class="card-header">
+          <div class="header-tag">04 // ESCALATION DYNAMICS &amp; LIFECYCLE TRACKING</div>
+          <h2 class="card-title">EVENT LIFECYCLE MATRIX</h2>
+        </div>
+        <div class="card-body">
+          <div class="lifecycle-legend">
+            <span class="legend-chip chip-new-shock">NEW_SHOCK</span>
+            <span class="legend-chip chip-escalation">ESCALATION</span>
+            <span class="legend-chip chip-full-impact">FULL_IMPACT</span>
+            <span class="legend-chip chip-stabilisation">STABILISATION</span>
+            <span class="legend-chip chip-recovery">RECOVERY</span>
+            <span class="legend-chip chip-structural">STRUCTURAL</span>
+          </div>
+          <div id="eventLifecycleList" class="lifecycle-grid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Global Asset Impact Matrix -->
+      <section class="card span-full asset-impact-card" id="cardAssetImpact">
+        <div class="card-header">
+          <div class="header-tag">05 // CROSS-ASSET MACRO TRANSMISSION</div>
+          <h2 class="card-title">GLOBAL ASSET IMPACT MATRIX</h2>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="impact-table" id="assetImpactTable">
+              <thead>
+                <tr>
+                  <th>ASSET</th>
+                  <th>DIRECTION</th>
+                  <th>SHORT-TERM OUTLOOK</th>
+                  <th>7-DAY SCENARIO</th>
+                  <th>PRIMARY GEOPOLITICAL DRIVER</th>
+                  <th>RISK</th>
+                  <th>CONFIDENCE</th>
+                  <th>TRANSMISSION EXPLANATION</th>
+                </tr>
+              </thead>
+              <tbody id="assetImpactBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Probabilistic Scenario Engine -->
+      <section class="card span-full scenarios-card" id="cardScenarios">
+        <div class="card-header">
+          <div class="header-tag">06 // PROBABILISTIC SCENARIO ENGINE</div>
+          <h2 class="card-title">SCENARIO ANALYSIS (BASE / ESCALATION / DE-ESCALATION)</h2>
+        </div>
+        <div class="card-body">
+          <div id="scenariosGrid" class="scenarios-grid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Strategic Watchlist -->
+      <section class="card span-full watchlist-card" id="cardWatchlist">
+        <div class="card-header">
+          <div class="header-tag">07 // HIGH-FREQUENCY SURVEILLANCE</div>
+          <h2 class="card-title">STRATEGIC WATCHLIST</h2>
+        </div>
+        <div class="card-body">
+          <div id="watchlistGrid" class="watchlist-grid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. 90-Second YouTube Briefing Script -->
+      <section class="card span-full video-script-card" id="cardVideoScript">
+        <div class="card-header script-header">
+          <div>
+            <div class="header-tag">08 // BROADCAST &amp; MACRO TELEPROMPTER</div>
+            <h2 class="card-title">90-SECOND YOUTUBE BRIEFING SCRIPT</h2>
+          </div>
+          <button id="copyScriptBtn" class="copy-script-btn" type="button">📋 COPY SCRIPT</button>
+        </div>
+        <div class="card-body">
+          <div id="videoScriptBox" class="teleprompter-box">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Tactical & Strategic Horizons -->
+      <section class="card span-1 outlook-card" id="cardOutlook24">
+        <div class="card-header">
+          <div class="header-tag">09 // TACTICAL HORIZON</div>
+          <h2 class="card-title">24–72 HOUR OUTLOOK</h2>
+        </div>
+        <div class="card-body">
+          <div id="outlook24Content" class="outlook-text"><!-- Populated via JS --></div>
+        </div>
+      </section>
+
+      <section class="card span-1 outlook-card" id="cardOutlook7d">
+        <div class="card-header">
+          <div class="header-tag">10 // MEDIUM-TERM HORIZON</div>
+          <h2 class="card-title">7-DAY STRATEGIC OUTLOOK</h2>
+        </div>
+        <div class="card-body">
+          <div id="outlook7dContent" class="outlook-text"><!-- Populated via JS --></div>
+        </div>
+      </section>
+
+      <section class="card span-1 what-changed-card" id="cardWhatChanged">
+        <div class="card-header">
+          <div class="header-tag">11 // 24-HOUR DELTA &amp; INTEL SHIFTS</div>
+          <h2 class="card-title">WHAT CHANGED TODAY</h2>
+        </div>
+        <div class="card-body">
+          <div id="whatChangedContent" class="what-changed-text"><!-- Populated via JS --></div>
+        </div>
+      </section>
+
+      <!-- 10. Key Dates & Sources -->
+      <section class="card span-2 key-dates-card" id="cardKeyDates">
+        <div class="card-header">
+          <div class="header-tag">12 // CRITICAL CALENDAR</div>
+          <h2 class="card-title">KEY DATES &amp; POLICY DEADLINES</h2>
+        </div>
+        <div class="card-body">
+          <div id="keyDatesList" class="key-dates-grid"><!-- Populated via JS --></div>
+        </div>
+      </section>
+
+      <section class="card span-1 sources-card" id="cardSources">
+        <div class="card-header">
+          <div class="header-tag">13 // OSINT REFERENCES</div>
+          <h2 class="card-title">INTELLIGENCE SOURCES</h2>
+        </div>
+        <div class="card-body">
+          <div id="sourcesList" class="sources-tags"><!-- Populated via JS --></div>
+        </div>
+      </section>
+
+      <!-- 11. Official Disclaimer -->
+      <section class="card span-full disclaimer-card" id="cardDisclaimer">
+        <div class="card-header">
+          <div class="header-tag">14 // REGULATORY &amp; MODEL NOTICE</div>
+          <h2 class="card-title">OFFICIAL DISCLAIMER</h2>
+        </div>
+        <div class="card-body">
+          <div id="disclaimerContent" class="disclaimer-text"><!-- Populated via JS --></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Command Footer -->
+  <footer class="hud-footer">
+    <div class="footer-left">
+      <span>GLOBAL GEOPOLITICAL WAR ROOM // INSTITUTIONAL MACRO INTELLIGENCE</span>
+    </div>
+    <div class="footer-right">
+      <span class="secure-tag" id="footerSecurityTag">🔒 INITIALIZING...</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

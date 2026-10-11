@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  war-room:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: global-geopolitical-war-room:v3.0
+    container_name: geopolitical-war-room
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - WAR_ROOM_MODE=${WAR_ROOM_MODE:-mock}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - WARROOM_LLM_MODEL=${WARROOM_LLM_MODEL:-gpt-4o}
+      - PORT=8000
+    volumes:
+      # Persistent SQLite historical dossier database
+      - warroom-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+volumes:
+  warroom-data:
+    driver: local

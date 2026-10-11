@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "name": "global-geopolitical-war-room",
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/style\\.css",
+      "dest": "/frontend/style.css"
+    },
+    {
+      "src": "/app\\.js",
+      "dest": "/frontend/app.js"
+    },
+    {
+      "src": "/favicon\\.ico",
+      "dest": "/frontend/favicon.ico"
+    },
+    {
+      "src": "/(.*\\.(png|svg|webp|woff2?|ttf|eot))",
+      "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.py"
+    }
+  ],
+  "env": {
+    "WAR_ROOM_MODE": "mock"
+  }
+}
