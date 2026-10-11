@@ -487,18 +487,16 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # ==========================================
-# Mount Frontend Static Assets (Local Dev Only)
-# On Vercel, static assets are routed directly by vercel.json — do NOT mount here.
-# Mounting StaticFiles in a serverless function causes path resolution issues.
+# Mount Frontend Static Assets
+# Serves the institutional command HUD on both local dev and Vercel.
+# On Vercel the lambda package includes the frontend/ directory, so the
+# absolute path derived from __file__ resolves correctly at runtime.
 
-if not IS_VERCEL:
-    frontend_dir = ROOT_DIR / "frontend"
-    if frontend_dir.exists():
-        app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
-    else:
-        logger.warning(f"Frontend directory not found at {frontend_dir}")
+frontend_dir = ROOT_DIR / "frontend"
+if frontend_dir.exists():
+    app.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 else:
-    logger.info("Running on Vercel — static assets served by Vercel CDN routing.")
+    logger.warning(f"Frontend directory not found at {frontend_dir}")
 
 
 if __name__ == "__main__":

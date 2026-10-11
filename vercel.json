@@ -10,23 +10,10 @@
       }
     }
   ],
+  "include": [
+    "frontend/**/*"
+  ],
   "routes": [
-    {
-      "src": "/style\\.css",
-      "dest": "/frontend/style.css"
-    },
-    {
-      "src": "/app\\.js",
-      "dest": "/frontend/app.js"
-    },
-    {
-      "src": "/favicon\\.ico",
-      "dest": "/frontend/favicon.ico"
-    },
-    {
-      "src": "/(.*\\.(png|svg|webp|woff2?|ttf|eot))",
-      "dest": "/frontend/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/api/index.py"
